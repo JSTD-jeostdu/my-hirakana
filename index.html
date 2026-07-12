@@ -27,16 +27,115 @@
   }
 
   header {
-    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 12px 24px;
+  }
+
+  .header-logo {
     font-size: 20px;
     font-weight: 700;
     color: var(--color-accent);
+    flex-shrink: 0;
   }
 
-  main {
+  .header-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 240px;
+    min-width: 200px;
+  }
+
+  .progress-bar {
+    flex: 1 1 120px;
+    height: 8px;
+    background: var(--color-guide);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--color-accent);
+    transition: width 0.2s ease;
+  }
+
+  .progress-text {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .autosave-status {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .header-reset {
+    width: auto;
+    padding: 8px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .quota-banner {
+    background: #fdecea;
+    color: #a13a2c;
+    padding: 8px 24px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .app-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
     max-width: 960px;
     margin: 0 auto;
-    padding: 0 24px 40px;
+    padding: 16px 24px 0;
+  }
+
+  .group-tabs {
+    flex: 0 0 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .group-tab {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--color-text);
+    text-align: left;
+  }
+
+  .group-tab .group-count {
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .group-tab.active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .main-content {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .prompt {
@@ -149,7 +248,93 @@
     line-height: 1.6;
   }
 
+  .nav-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .nav-buttons .action-btn {
+    width: auto;
+    padding: 10px 20px;
+  }
+
+  .all-complete-banner {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .glyph-grid-section {
+    max-width: 960px;
+    margin: 24px auto 0;
+    padding: 0 24px 40px;
+  }
+
+  .glyph-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .glyph-cell {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: #fff;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .glyph-cell.empty {
+    background: #f1ece2;
+  }
+
+  .glyph-cell.empty .glyph-cell-char {
+    color: #c3b9a8;
+    font-size: 24px;
+  }
+
+  .glyph-cell.current {
+    border-color: var(--color-accent);
+    border-width: 2px;
+  }
+
+  .glyph-cell-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
   @media (max-width: 720px) {
+    .app-layout {
+      flex-direction: column;
+      padding: 12px 16px 0;
+    }
+    .group-tabs {
+      flex-direction: row;
+      overflow-x: auto;
+      width: 100%;
+      flex: none;
+      padding-bottom: 4px;
+    }
+    .group-tab {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
     .workspace {
       flex-direction: column;
     }
@@ -164,54 +349,84 @@
     .control-group {
       flex: 1 1 140px;
     }
+    .glyph-grid-section {
+      padding: 0 16px 32px;
+    }
+    header {
+      padding: 12px 16px;
+    }
   }
 </style>
 </head>
 <body>
 
-<header>手書き글꼴</header>
-
-<main>
-  <div class="prompt">
-    <h2 id="currentCharLabel"># 지금 쓸 글자: <span id="currentChar">あ</span></h2>
-    <p>칸 가운데에 크게 써 주세요. 획 순서는 자유입니다.</p>
+<header>
+  <div class="header-logo">手書き글꼴</div>
+  <div class="header-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-text" id="progressText">기본 157자 중 0자</span>
+    <span class="autosave-status" id="autosaveStatus"></span>
   </div>
+  <button class="action-btn header-reset" id="resetAllBtn">전체 초기화</button>
+</header>
 
-  <div class="workspace">
-    <div class="canvas-wrap">
-      <canvas id="kanaCanvas"></canvas>
+<div class="quota-banner" id="quotaBanner" hidden>저장 공간이 부족합니다. 백업 기능은 다음 업데이트에서 제공됩니다.</div>
+
+<div class="app-layout">
+  <nav class="group-tabs" id="groupTabs"></nav>
+
+  <div class="main-content">
+    <div class="prompt">
+      <h2># 지금 쓸 글자: <span id="currentChar">あ</span></h2>
+      <p id="charHint">칸 가운데에 크게 써 주세요. 획 순서는 자유입니다.</p>
     </div>
 
-    <div class="controls">
-      <div class="control-group">
-        <h3>붓 두께</h3>
-        <div class="brush-options" id="brushOptions">
-          <label class="brush-option" data-size="thin">
-            <input type="radio" name="brushSize" value="thin"> 얇게
-          </label>
-          <label class="brush-option active" data-size="normal">
-            <input type="radio" name="brushSize" value="normal" checked> 보통
-          </label>
-          <label class="brush-option" data-size="thick">
-            <input type="radio" name="brushSize" value="thick"> 굵게
-          </label>
+    <div class="workspace">
+      <div class="canvas-wrap">
+        <canvas id="kanaCanvas"></canvas>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <h3>붓 두께</h3>
+          <div class="brush-options" id="brushOptions">
+            <label class="brush-option" data-size="thin">
+              <input type="radio" name="brushSize" value="thin"> 얇게
+            </label>
+            <label class="brush-option active" data-size="normal">
+              <input type="radio" name="brushSize" value="normal" checked> 보통
+            </label>
+            <label class="brush-option" data-size="thick">
+              <input type="radio" name="brushSize" value="thick"> 굵게
+            </label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h3>지우기</h3>
+          <button class="action-btn" id="undoBtn" disabled>한 획 지우기</button>
+          <br><br>
+          <button class="action-btn" id="clearAllBtn" disabled>전부 지우기</button>
         </div>
       </div>
-
-      <div class="control-group">
-        <h3>지우기</h3>
-        <button class="action-btn" id="undoBtn" disabled>한 획 지우기</button>
-        <br><br>
-        <button class="action-btn" id="clearAllBtn" disabled>전부 지우기</button>
-      </div>
     </div>
-  </div>
 
-  <p class="hint">
-    두께는 새로 긋는 획부터 적용됩니다.<br>
-    이미 그린 획은 지우고 다시 쓰면 돼요.
-  </p>
-</main>
+    <div class="nav-buttons">
+      <button class="action-btn" id="prevCharBtn">← 이전 글자</button>
+      <button class="action-btn" id="nextCharBtn">다음 글자 →</button>
+      <p class="all-complete-banner" id="allCompleteBanner" hidden>기본 글자를 모두 썼습니다! 🎉</p>
+    </div>
+
+    <p class="hint">
+      두께는 새로 긋는 획부터 적용됩니다.<br>
+      이미 그린 획은 지우고 다시 쓰면 돼요.
+    </p>
+  </div>
+</div>
+
+<div class="glyph-grid-section">
+  <div class="glyph-grid" id="glyphGrid"></div>
+</div>
 
 <script>
   // ── 설정값: 모든 튜닝 상수를 이곳에 모아 관리 ──
@@ -221,24 +436,116 @@
     BRUSH_SIZES: { thin: 12, normal: 18, thick: 26 },  // 붓 두께 (논리 px)
     SMOOTHING_MIN_DIST: 1.5,      // 이 거리(논리 px) 미만 이동은 무시해 점 수 절약
     CLEAR_CONFIRM_THRESHOLD: 3,   // 전부 지우기 시 confirm()을 띄우는 최소 획 수
+    SAVE_DEBOUNCE_MS: 1000,       // 자동 저장 디바운스
+    DP_EPSILON: 1.5,              // Douglas-Peucker 단순화 허용 오차 (논리 px)
+    GRID_CELL_SIZE: 60,           // 글자 그리드 셀 크기 (px)
     COLORS: {
       guide: '#e5dccb',
       ink: '#1a1a1a'
     }
   };
 
-  // ── 전역 상태 ──
+  // ── 문자 세트 정의: 이 순서가 곧 기본 진행 순서 ──
+  const CHARSET = [
+    { id: 'hiragana', label: 'ひらがな', chars: [...'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'] },
+    { id: 'katakana', label: 'カタカナ', chars: [...'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'] },
+    { id: 'digit',    label: '123',      chars: [...'0123456789'] },
+    { id: 'upper',    label: 'ABC',      chars: [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'] },
+    { id: 'lower',    label: 'abc',      chars: [...'abcdefghijklmnopqrstuvwxyz'] },
+    { id: 'mark',     label: '부호',      chars: ['゛', '゜', 'ー'] },
+  ];
+
+  const ALL_CHARS = CHARSET.flatMap((g) => g.chars);
+
+  const CHAR_TO_GROUP = new Map();
+  for (const g of CHARSET) {
+    for (const c of g.chars) CHAR_TO_GROUP.set(c, g.id);
+  }
+
+  // ── 전역 상태: 캔버스에 지금 떠 있는 작업본 ──
   const state = {
     brushSize: CONFIG.BRUSH_SIZES.normal,
     strokes: [],        // { w: number, pts: [[x, y], ...] }[]
     currentChar: 'あ'
   };
 
-  // ── 저장 계층 자리 (구현은 S2에서) ──
-  const StorageAdapter = {
-    save(charKey, strokes) { /* TODO: S2 — localStorage 자동 저장 */ },
-    load(charKey) { /* TODO: S2 — localStorage 불러오기 */ }
+  // ── 프로젝트 데이터: localStorage에 저장되는 단위 ──
+  const project = {
+    version: 1,
+    meta: { createdAt: 0, updatedAt: 0 },
+    settings: { brushSize: CONFIG.BRUSH_SIZES.normal },
+    glyphs: {},          // char -> { strokes, updatedAt }
+    currentChar: 'あ'
   };
+
+  // ── 저장 계층: localStorage 구현 ──
+  const StorageAdapter = {
+    KEY: 'tegaki-font-project-v1',
+    save(proj) {
+      localStorage.setItem(this.KEY, JSON.stringify(simplifyProjectForSave(proj)));
+    },
+    load() {
+      try {
+        const raw = localStorage.getItem(this.KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (err) {
+        return null;
+      }
+    },
+    clear() {
+      localStorage.removeItem(this.KEY);
+    }
+  };
+
+  // Douglas-Peucker 획 단순화 (재귀 없이 스택 방식 — 긴 획도 안전)
+  function perpendicularDistance(p, a, b) {
+    const [x, y] = p, [x1, y1] = a, [x2, y2] = b;
+    const dx = x2 - x1, dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.hypot(x - x1, y - y1);
+    const t = ((x - x1) * dx + (y - y1) * dy) / lenSq;
+    const px = x1 + t * dx, py = y1 + t * dy;
+    return Math.hypot(x - px, y - py);
+  }
+
+  function simplifyDouglasPeucker(points, epsilon) {
+    if (points.length < 3) return points.slice();
+    const keep = new Array(points.length).fill(false);
+    keep[0] = true;
+    keep[points.length - 1] = true;
+    const stack = [[0, points.length - 1]];
+    while (stack.length > 0) {
+      const [start, end] = stack.pop();
+      let maxDist = 0;
+      let maxIdx = -1;
+      for (let i = start + 1; i < end; i++) {
+        const d = perpendicularDistance(points[i], points[start], points[end]);
+        if (d > maxDist) { maxDist = d; maxIdx = i; }
+      }
+      if (maxDist > epsilon && maxIdx !== -1) {
+        keep[maxIdx] = true;
+        stack.push([start, maxIdx]);
+        stack.push([maxIdx, end]);
+      }
+    }
+    return points.filter((_, i) => keep[i]);
+  }
+
+  // 저장본만 단순화 — 화면 작업 중인 원본(project.glyphs)은 그대로 유지
+  function simplifyProjectForSave(proj) {
+    const glyphs = {};
+    for (const char of Object.keys(proj.glyphs)) {
+      const glyph = proj.glyphs[char];
+      glyphs[char] = {
+        strokes: glyph.strokes.map((s) => ({
+          w: s.w,
+          pts: simplifyDouglasPeucker(s.pts, CONFIG.DP_EPSILON).map((p) => [Math.round(p[0]), Math.round(p[1])])
+        })),
+        updatedAt: glyph.updatedAt
+      };
+    }
+    return { version: proj.version, meta: proj.meta, settings: proj.settings, glyphs, currentChar: proj.currentChar };
+  }
 
   // ── DOM 참조 ──
   const canvas = document.getElementById('kanaCanvas');
@@ -247,10 +554,20 @@
   const undoBtn = document.getElementById('undoBtn');
   const clearAllBtn = document.getElementById('clearAllBtn');
   const brushOptions = document.getElementById('brushOptions');
+  const currentCharEl = document.getElementById('currentChar');
+  const charHintEl = document.getElementById('charHint');
+  const prevCharBtn = document.getElementById('prevCharBtn');
+  const nextCharBtn = document.getElementById('nextCharBtn');
+  const allCompleteBanner = document.getElementById('allCompleteBanner');
+  const groupTabsEl = document.getElementById('groupTabs');
+  const glyphGridEl = document.getElementById('glyphGrid');
+  const progressFillEl = document.getElementById('progressFill');
+  const progressTextEl = document.getElementById('progressText');
+  const autosaveStatusEl = document.getElementById('autosaveStatus');
+  const quotaBannerEl = document.getElementById('quotaBanner');
+  const resetAllBtn = document.getElementById('resetAllBtn');
 
-  document.getElementById('currentChar').textContent = state.currentChar;
-
-  // ── 순수 렌더 함수: 이후 단계(썸네일·미리보기)에서 컨텍스트만 바꿔 재사용 ──
+  // ── 순수 렌더 함수: 캔버스 코어(S1)와 동일, 썸네일에서도 그대로 재사용 ──
   function drawSmoothStroke(ctx, pts, width) {
     ctx.lineWidth = width;
     if (pts.length === 0) return;
@@ -386,13 +703,13 @@
   function finishStroke() {
     if (currentPts.length > 0) {
       state.strokes.push({ w: activeStrokeWidth, pts: currentPts });
-      StorageAdapter.save(state.currentChar, state.strokes);
     }
     currentPts = [];
     prevMid = null;
     activePointerId = null;
     redrawAll();
     updateButtonStates();
+    syncCurrentGlyph();
   }
 
   function onPointerUp(e) {
@@ -411,12 +728,23 @@
   canvas.addEventListener('pointercancel', onPointerCancel);
 
   // ── 붓 두께 선택 ──
+  function syncBrushSizeUI() {
+    const sizeKey = Object.keys(CONFIG.BRUSH_SIZES).find((k) => CONFIG.BRUSH_SIZES[k] === state.brushSize) || 'normal';
+    brushOptions.querySelectorAll('.brush-option').forEach((el) => {
+      const match = el.dataset.size === sizeKey;
+      el.classList.toggle('active', match);
+      el.querySelector('input').checked = match;
+    });
+  }
+
   brushOptions.addEventListener('change', (e) => {
     const size = e.target.value;
     state.brushSize = CONFIG.BRUSH_SIZES[size];
+    project.settings.brushSize = state.brushSize;
     brushOptions.querySelectorAll('.brush-option').forEach((el) => {
       el.classList.toggle('active', el.dataset.size === size);
     });
+    scheduleSave();
   });
 
   // ── 한 획 지우기 ──
@@ -425,7 +753,7 @@
     state.strokes.pop();
     redrawAll();
     updateButtonStates();
-    StorageAdapter.save(state.currentChar, state.strokes);
+    syncCurrentGlyph();
   }
   undoBtn.addEventListener('click', undoStroke);
 
@@ -438,23 +766,352 @@
     state.strokes = [];
     redrawAll();
     updateButtonStates();
-    StorageAdapter.save(state.currentChar, state.strokes);
+    syncCurrentGlyph();
   });
 
-  // ── 단축키: Ctrl/Cmd+Z = 한 획 지우기 ──
+  // ── 단축키: Ctrl/Cmd+Z = 한 획 지우기, Enter/→ = 다음 글자, ← = 이전 글자 ──
   window.addEventListener('keydown', (e) => {
     const isUndoKey = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z';
     if (isUndoKey) {
       e.preventDefault();
       undoStroke();
+      return;
+    }
+    if (activePointerId !== null) return; // 그리는 중에는 무시
+    if (e.key === 'Enter' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      goToNextChar();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goToPrevChar();
     }
   });
 
   // ── 반응형 리사이즈 ──
   window.addEventListener('resize', resizeCanvas);
 
-  resizeCanvas();
-  updateButtonStates();
+  // ── 글자별 안내 문구 ──
+  function getHintHtml(char) {
+    if (char === '゛') return '탁점입니다. か → が처럼 글자 오른쪽 위에 붙는 점 두 개를, <strong>칸 전체를 크게 사용해</strong> 써 주세요. (엔진이 알아서 줄여 배치합니다)';
+    if (char === '゜') return '반탁점입니다. は → ぱ처럼 붙는 작은 동그라미를 <strong>칸 전체를 크게 사용해</strong> 써 주세요.';
+    if (char === 'ー') return '장음 기호입니다. 가로로 길게 그어 주세요.';
+    return '칸 가운데에 크게 써 주세요. 획 순서는 자유입니다.';
+  }
+
+  function updateCharUI() {
+    currentCharEl.textContent = state.currentChar;
+    charHintEl.innerHTML = getHintHtml(state.currentChar);
+  }
+
+  // ── 완료 글자 판정 / 진행률 ──
+  function isCharDone(char) {
+    const glyph = project.glyphs[char];
+    return !!glyph && glyph.strokes.length > 0;
+  }
+
+  // S3(합성 엔진)·S4(미리보기)가 사용할 훅
+  function getCompletedChars() {
+    return ALL_CHARS.filter(isCharDone);
+  }
+
+  function getProgressText() {
+    const n = getCompletedChars().length;
+    return `기본 157자 중 ${n}자`;
+    // S3: "폰트에는 M자 준비됨" (M = N + 자동 합성분) 문구 추가 예정
+  }
+
+  function updateProgressBar() {
+    const n = getCompletedChars().length;
+    progressFillEl.style.width = `${(n / ALL_CHARS.length) * 100}%`;
+    progressTextEl.textContent = getProgressText();
+  }
+
+  // S3: 여기서 합성 엔진 트리거(파생 글자 재계산) + 실시간 미리보기 갱신이 연결됨
+  function onGlyphChange(char) {
+    // TODO: S3
+  }
+
+  // ── 글자 완료 시점마다 project.glyphs와 화면(그리드·진행바·저장)을 동기화 ──
+  function syncCurrentGlyph() {
+    const char = state.currentChar;
+    if (state.strokes.length > 0) {
+      project.glyphs[char] = { strokes: state.strokes, updatedAt: Date.now() };
+    } else {
+      delete project.glyphs[char];
+    }
+    updateGlyphCell(char);
+    updateGroupTabCount(CHAR_TO_GROUP.get(char));
+    updateProgressBar();
+    onGlyphChange(char);
+    scheduleSave();
+  }
+
+  // ── 그룹 탭 ──
+  let currentGroupId = CHARSET[0].id;
+
+  function renderGroupTabs() {
+    groupTabsEl.innerHTML = '';
+    for (const g of CHARSET) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'group-tab';
+      btn.dataset.group = g.id;
+      btn.innerHTML = `<span class="group-label">${g.label}</span><span class="group-count" data-count-for="${g.id}">0/${g.chars.length}</span>`;
+      btn.addEventListener('click', () => selectGroup(g.id));
+      groupTabsEl.appendChild(btn);
+    }
+    updateAllGroupCounts();
+    highlightActiveGroupTab();
+  }
+
+  function updateAllGroupCounts() {
+    for (const g of CHARSET) updateGroupTabCount(g.id);
+  }
+
+  function updateGroupTabCount(groupId) {
+    const g = CHARSET.find((x) => x.id === groupId);
+    if (!g) return;
+    const done = g.chars.filter(isCharDone).length;
+    const el = groupTabsEl.querySelector(`[data-count-for="${groupId}"]`);
+    if (el) el.textContent = `${done}/${g.chars.length}`;
+  }
+
+  function highlightActiveGroupTab() {
+    groupTabsEl.querySelectorAll('.group-tab').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.group === currentGroupId);
+    });
+  }
+
+  function selectGroup(groupId) {
+    currentGroupId = groupId;
+    highlightActiveGroupTab();
+    renderGlyphGrid();
+  }
+
+  // ── 글자 그리드 (선택된 그룹만 렌더 — 157칸 전체를 매번 다시 그리지 않음) ──
+  const cellRefs = new Map(); // char -> { wrapper }
+
+  function renderGlyphGrid() {
+    glyphGridEl.innerHTML = '';
+    cellRefs.clear();
+    const group = CHARSET.find((g) => g.id === currentGroupId);
+    for (const char of group.chars) {
+      const wrapper = document.createElement('button');
+      wrapper.type = 'button';
+      wrapper.className = 'glyph-cell';
+      wrapper.addEventListener('click', () => goToChar(char));
+      glyphGridEl.appendChild(wrapper);
+      cellRefs.set(char, { wrapper });
+      renderCellContent(char);
+    }
+    markCurrentCellInGrid(state.currentChar);
+  }
+
+  function renderCellContent(char) {
+    const cell = cellRefs.get(char);
+    if (!cell) return; // 다른 그룹이 표시 중 — 탭 전환 시 자동으로 반영됨
+    const wrapper = cell.wrapper;
+    wrapper.innerHTML = '';
+    const glyph = project.glyphs[char];
+    if (glyph && glyph.strokes.length > 0) {
+      const px = CONFIG.GRID_CELL_SIZE;
+      const dpr = window.devicePixelRatio || 1;
+      const thumb = document.createElement('canvas');
+      thumb.width = px * dpr;
+      thumb.height = px * dpr;
+      thumb.style.width = px + 'px';
+      thumb.style.height = px + 'px';
+      renderStrokes(thumb.getContext('2d'), glyph.strokes, { scale: (px * dpr) / CONFIG.LOGICAL_SIZE });
+      wrapper.appendChild(thumb);
+
+      const dot = document.createElement('span');
+      dot.className = 'glyph-cell-dot';
+      wrapper.appendChild(dot);
+
+      wrapper.classList.add('completed');
+      wrapper.classList.remove('empty');
+    } else {
+      const span = document.createElement('span');
+      span.className = 'glyph-cell-char';
+      span.textContent = char;
+      wrapper.appendChild(span);
+
+      wrapper.classList.add('empty');
+      wrapper.classList.remove('completed');
+    }
+  }
+
+  function updateGlyphCell(char) {
+    if (!cellRefs.has(char)) return; // 현재 그룹에 표시 중이 아니면 다음 탭 전환 때 반영
+    renderCellContent(char);
+    markCurrentCellInGrid(state.currentChar);
+  }
+
+  function markCurrentCellInGrid(char) {
+    glyphGridEl.querySelectorAll('.glyph-cell.current').forEach((el) => el.classList.remove('current'));
+    const cell = cellRefs.get(char);
+    if (cell) cell.wrapper.classList.add('current');
+  }
+
+  // ── 진행 큐: 다음/이전 글자 이동 ──
+  function findNextIncomplete(fromChar) {
+    const startIdx = ALL_CHARS.indexOf(fromChar);
+    for (let offset = 1; offset <= ALL_CHARS.length; offset++) {
+      const idx = (startIdx + offset) % ALL_CHARS.length;
+      const c = ALL_CHARS[idx];
+      if (!isCharDone(c)) return c;
+    }
+    return null; // 전부 완료
+  }
+
+  function goToChar(char) {
+    const glyph = project.glyphs[char];
+    state.strokes = glyph ? glyph.strokes : [];
+    state.currentChar = char;
+    project.currentChar = char;
+    currentPts = [];
+    prevMid = null;
+    activePointerId = null;
+
+    redrawAll();
+    updateButtonStates();
+    updateCharUI();
+
+    const g = CHAR_TO_GROUP.get(char);
+    if (g !== currentGroupId) {
+      currentGroupId = g;
+      highlightActiveGroupTab();
+      renderGlyphGrid();
+    } else {
+      markCurrentCellInGrid(char);
+    }
+    scheduleSave();
+  }
+
+  function goToNextChar() {
+    const next = findNextIncomplete(state.currentChar);
+    if (next === null) {
+      allCompleteBanner.hidden = false;
+      return;
+    }
+    allCompleteBanner.hidden = true;
+    goToChar(next);
+  }
+
+  function goToPrevChar() {
+    const idx = ALL_CHARS.indexOf(state.currentChar);
+    const prevIdx = (idx - 1 + ALL_CHARS.length) % ALL_CHARS.length;
+    goToChar(ALL_CHARS[prevIdx]);
+  }
+
+  prevCharBtn.addEventListener('click', goToPrevChar);
+  nextCharBtn.addEventListener('click', goToNextChar);
+
+  // ── 자동 저장 (디바운스 1초) ──
+  let saveTimer = null;
+
+  function persistProject() {
+    try {
+      StorageAdapter.save(project);
+      quotaBannerEl.hidden = true;
+      renderAutosaveStatus();
+    } catch (err) {
+      if (err && err.name === 'QuotaExceededError') {
+        quotaBannerEl.hidden = false;
+      }
+    }
+  }
+
+  function scheduleSave() {
+    project.meta.updatedAt = Date.now();
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      persistProject();
+      saveTimer = null;
+    }, CONFIG.SAVE_DEBOUNCE_MS);
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    persistProject();
+  });
+
+  function renderAutosaveStatus() {
+    if (!project.meta.updatedAt) {
+      autosaveStatusEl.textContent = '';
+      return;
+    }
+    const diffMin = Math.floor((Date.now() - project.meta.updatedAt) / 60000);
+    autosaveStatusEl.textContent = `자동 저장됨 · ${diffMin < 1 ? '방금' : diffMin + '분 전'}`;
+  }
+  setInterval(renderAutosaveStatus, 60000);
+
+  // ── 전체 초기화 ──
+  resetAllBtn.addEventListener('click', () => {
+    if (!confirm('모든 글자를 지우고 처음부터 시작할까요? 되돌릴 수 없습니다.')) return;
+
+    StorageAdapter.clear();
+    project.version = 1;
+    project.meta = { createdAt: Date.now(), updatedAt: Date.now() };
+    project.settings = { brushSize: CONFIG.BRUSH_SIZES.normal };
+    project.glyphs = {};
+    project.currentChar = ALL_CHARS[0];
+
+    state.brushSize = project.settings.brushSize;
+    state.strokes = [];
+    state.currentChar = ALL_CHARS[0];
+    currentPts = [];
+    prevMid = null;
+    activePointerId = null;
+
+    syncBrushSizeUI();
+    redrawAll();
+    updateButtonStates();
+    updateCharUI();
+    allCompleteBanner.hidden = true;
+    renderGroupTabs();
+    selectGroup(CHARSET[0].id);
+    updateProgressBar();
+    persistProject();
+  });
+
+  // ── 초기화: localStorage 복원 또는 새 프로젝트 ──
+  function init() {
+    const loaded = StorageAdapter.load();
+    if (loaded && loaded.glyphs) {
+      project.version = loaded.version || 1;
+      project.meta = loaded.meta || { createdAt: Date.now(), updatedAt: 0 };
+      project.settings = loaded.settings || { brushSize: CONFIG.BRUSH_SIZES.normal };
+      project.glyphs = loaded.glyphs || {};
+      project.currentChar = (loaded.currentChar && ALL_CHARS.includes(loaded.currentChar)) ? loaded.currentChar : ALL_CHARS[0];
+    } else {
+      project.version = 1;
+      project.meta = { createdAt: Date.now(), updatedAt: 0 };
+      project.settings = { brushSize: CONFIG.BRUSH_SIZES.normal };
+      project.glyphs = {};
+      project.currentChar = ALL_CHARS[0];
+    }
+
+    state.brushSize = project.settings.brushSize;
+    state.currentChar = project.currentChar;
+    const glyph = project.glyphs[state.currentChar];
+    state.strokes = glyph ? glyph.strokes : [];
+    currentGroupId = CHAR_TO_GROUP.get(state.currentChar);
+
+    renderGroupTabs();
+    selectGroup(currentGroupId);
+    syncBrushSizeUI();
+    updateCharUI();
+    updateProgressBar();
+    renderAutosaveStatus(); // updatedAt=0이면 상태 텍스트 비움 (아직 저장된 적 없음)
+    resizeCanvas();
+    updateButtonStates();
+  }
+
+  init();
 </script>
 
 </body>
