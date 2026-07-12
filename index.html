@@ -71,6 +71,15 @@
     white-space: nowrap;
   }
 
+  @keyframes progressFlash {
+    0% { color: var(--color-accent); }
+    100% { color: var(--color-text-muted); }
+  }
+
+  .progress-text.flash {
+    animation: progressFlash 0.5s ease;
+  }
+
   .autosave-status {
     font-size: 12px;
     color: var(--color-text-muted);
@@ -319,6 +328,161 @@
     background: var(--color-accent);
   }
 
+  .derived-panel-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+  }
+
+  .derived-panel-toggle {
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-text);
+  }
+
+  .derived-panel-toggle:hover {
+    border-color: var(--color-accent);
+  }
+
+  .toggle-arrow {
+    display: inline-block;
+    width: 14px;
+  }
+
+  .derived-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .derived-cell {
+    width: 60px;
+    padding: 0 0 4px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .derived-cell.pending {
+    background: #f1ece2;
+  }
+
+  .derived-cell.pending .derived-cell-char {
+    color: #c3b9a8;
+    font-size: 22px;
+  }
+
+  .derived-cell-glyph {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .derived-cell-badge {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .preview-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+  }
+
+  .preview-title {
+    font-size: 16px;
+    margin: 0 0 12px;
+  }
+
+  .preview-size-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  .preview-size-row input[type="range"] {
+    accent-color: var(--color-accent);
+  }
+
+  .preview-placeholder {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    font-style: italic;
+    margin: 0 0 16px;
+  }
+
+  .preview-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .preview-line {
+    overflow-x: auto;
+    min-height: 1px;
+  }
+
+  .preview-free-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .preview-free-input {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--color-text);
+  }
+
+  .preview-line-free {
+    min-height: 24px;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(12px);
+    background: #2b2721;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 1000;
+    white-space: nowrap;
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   @media (max-width: 720px) {
     .app-layout {
       flex-direction: column;
@@ -349,8 +513,11 @@
     .control-group {
       flex: 1 1 140px;
     }
-    .glyph-grid-section {
-      padding: 0 16px 32px;
+    .glyph-grid-section,
+    .derived-panel-section,
+    .preview-section {
+      padding-left: 16px;
+      padding-right: 16px;
     }
     header {
       padding: 12px 16px;
@@ -428,6 +595,30 @@
   <div class="glyph-grid" id="glyphGrid"></div>
 </div>
 
+<div class="derived-panel-section">
+  <button type="button" class="derived-panel-toggle" id="derivedPanelToggle">
+    <span class="toggle-arrow">▸</span>자동 합성 69자 · 기본 글자를 쓰면 여기에 나타납니다
+  </button>
+  <div class="derived-grid" id="derivedGrid" hidden></div>
+</div>
+
+<div class="preview-section">
+  <h3 class="preview-title">미리보기 — 쓰는 순간 당신의 글씨로 바뀝니다</h3>
+  <div class="preview-size-row">
+    <label for="previewSizeSlider">크기</label>
+    <input type="range" id="previewSizeSlider">
+    <span id="previewSizeValue"></span>
+  </div>
+  <p class="preview-placeholder" id="previewPlaceholder">자모를 쓰기 시작하면 여기에서 당신의 글씨로 문장이 보입니다</p>
+  <div class="preview-lines" id="previewLines" hidden></div>
+  <div class="preview-free-row" id="previewFreeRow" hidden>
+    <input type="text" id="previewFreeInput" class="preview-free-input" placeholder="아무 문장이나 입력해보세요">
+    <div class="preview-line preview-line-free" id="previewFreeLine"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
   // ── 설정값: 모든 튜닝 상수를 이곳에 모아 관리 ──
   const CONFIG = {
@@ -439,6 +630,12 @@
     SAVE_DEBOUNCE_MS: 1000,       // 자동 저장 디바운스
     DP_EPSILON: 1.5,              // Douglas-Peucker 단순화 허용 오차 (논리 px)
     GRID_CELL_SIZE: 60,           // 글자 그리드 셀 크기 (px)
+    PREVIEW_REF_PX: 256,          // 미리보기 글자 캐시 기준 해상도 (1em = 이 값 px) — 슬라이더 범위(24~72)보다 항상 커서 확대해도 흐려지지 않음
+    PREVIEW_DEBOUNCE_MS: 300,     // 미리보기 리렌더 디바운스
+    PREVIEW_MIN_SIZE: 24,
+    PREVIEW_MAX_SIZE: 72,
+    PREVIEW_DEFAULT_SIZE: 40,
+    TOAST_DURATION_MS: 1800,
     COLORS: {
       guide: '#e5dccb',
       ink: '#1a1a1a'
@@ -461,6 +658,66 @@
   for (const g of CHARSET) {
     for (const c of g.chars) CHAR_TO_GROUP.set(c, g.id);
   }
+
+  // ── 파생 글자 정의: 문자열 쌍을 zip해서 오타 없이 생성 ──
+  const DAKUTEN_PAIRS = [
+    ['かきくけこさしすせそたちつてとはひふへほ', 'がぎぐげござじずぜぞだぢづでどばびぶべぼ'], // 히라가나 20
+    ['カキクケコサシスセソタチツテトハヒフヘホウ', 'ガギグゲゴザジズゼゾダヂヅデドバビブベボヴ'], // 가타카나 21 (ウ→ヴ 포함)
+  ];
+  const HANDAKUTEN_PAIRS = [
+    ['はひふへほ', 'ぱぴぷぺぽ'],   // 히라가나 5
+    ['ハヒフヘホ', 'パピプペポ'],   // 가타카나 5
+  ];
+  const SMALL_PAIRS = [
+    ['あいうえおやゆよつ', 'ぁぃぅぇぉゃゅょっ'],   // 히라가나 9
+    ['アイウエオヤユヨツ', 'ァィゥェォャュョッ'],   // 가타카나 9
+  ];
+
+  function buildDerivedTable() {
+    const table = {};
+    function zip(pairs, kind) {
+      for (const [baseStr, derivedStr] of pairs) {
+        const bases = [...baseStr];
+        const deriveds = [...derivedStr];
+        for (let i = 0; i < deriveds.length; i++) {
+          table[deriveds[i]] = { base: bases[i], kind };
+        }
+      }
+    }
+    zip(DAKUTEN_PAIRS, 'dakuten');
+    zip(HANDAKUTEN_PAIRS, 'handakuten');
+    zip(SMALL_PAIRS, 'small');
+    return table;
+  }
+  const DERIVED = buildDerivedTable(); // char -> { base, kind }
+
+  // 역방향 의존 인덱스: 이 글자(재료)가 바뀌면 영향받는 파생 글자 목록
+  // (base 자신뿐 아니라 탁점 ゛/반탁점 ゜ 자체가 바뀔 때도 관련 파생 전체를 무효화해야 함)
+  const DERIVED_DEPS = new Map();
+  function addDerivedDep(trigger, derivedChar) {
+    if (!DERIVED_DEPS.has(trigger)) DERIVED_DEPS.set(trigger, new Set());
+    DERIVED_DEPS.get(trigger).add(derivedChar);
+  }
+  for (const derivedChar of Object.keys(DERIVED)) {
+    const info = DERIVED[derivedChar];
+    addDerivedDep(info.base, derivedChar);
+    if (info.kind === 'dakuten') addDerivedDep('゛', derivedChar);
+    if (info.kind === 'handakuten') addDerivedDep('゜', derivedChar);
+  }
+
+  // ── 합성 기하 규칙: 배율·오프셋 튜닝은 이 객체만 수정하면 됨 ──
+  const COMPOSE_RULES = {
+    // 탁음·반탁음 공통: 기본 글자를 살짝 줄여 좌하단에, 부호를 우상단 영역에
+    voiced: {
+      baseScale: 0.90,
+      baseAnchor: [0, 640],                  // 좌하단 기준 축소 → 우상단에 부호 공간 확보
+      markTargetRect: [396, 20, 610, 235],   // [x1, y1, x2, y2] 부호가 들어갈 영역
+    },
+    small: {
+      scale: 0.62,
+      anchor: [320, 640],                    // 하단 중앙 기준 축소 (가로쓰기 관행)
+    },
+  };
 
   // ── 전역 상태: 캔버스에 지금 떠 있는 작업본 ──
   const state = {
@@ -566,8 +823,18 @@
   const autosaveStatusEl = document.getElementById('autosaveStatus');
   const quotaBannerEl = document.getElementById('quotaBanner');
   const resetAllBtn = document.getElementById('resetAllBtn');
+  const derivedPanelToggleEl = document.getElementById('derivedPanelToggle');
+  const derivedGridEl = document.getElementById('derivedGrid');
+  const toastEl = document.getElementById('toast');
+  const previewSizeSliderEl = document.getElementById('previewSizeSlider');
+  const previewSizeValueEl = document.getElementById('previewSizeValue');
+  const previewPlaceholderEl = document.getElementById('previewPlaceholder');
+  const previewLinesEl = document.getElementById('previewLines');
+  const previewFreeRowEl = document.getElementById('previewFreeRow');
+  const previewFreeInputEl = document.getElementById('previewFreeInput');
+  const previewFreeLineEl = document.getElementById('previewFreeLine');
 
-  // ── 순수 렌더 함수: 캔버스 코어(S1)와 동일, 썸네일에서도 그대로 재사용 ──
+  // ── 순수 렌더 함수: 캔버스 코어(S1)와 동일, 썸네일·미리보기에서도 그대로 재사용 ──
   function drawSmoothStroke(ctx, pts, width) {
     ctx.lineWidth = width;
     if (pts.length === 0) return;
@@ -809,29 +1076,396 @@
     return !!glyph && glyph.strokes.length > 0;
   }
 
-  // S3(합성 엔진)·S4(미리보기)가 사용할 훅
   function getCompletedChars() {
     return ALL_CHARS.filter(isCharDone);
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // 자동 합성 엔진
+  // ═══════════════════════════════════════════════════════════
+
+  // 획 데이터 복사본의 점 좌표에 변환 함수를 적용 (두께 w도 같은 배율로 스케일)
+  function transformStrokes(strokes, pointFn, widthScale) {
+    return strokes.map((s) => ({
+      w: s.w * widthScale,
+      pts: s.pts.map((p) => pointFn(p))
+    }));
+  }
+
+  // 앵커 (ax, ay) 기준 균등 축소: x' = ax + (x-ax)*s, y' = ay + (y-ay)*s
+  function scaleFromAnchor(strokes, scale, anchor) {
+    const [ax, ay] = anchor;
+    return transformStrokes(strokes, ([x, y]) => [ax + (x - ax) * scale, ay + (y - ay) * scale], scale);
+  }
+
+  function computeBBox(strokes) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const s of strokes) {
+      for (const [x, y] of s.pts) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+    if (minX === Infinity) return null;
+    return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+  }
+
+  // 부호(゛/゜)의 실제 바운딩 박스를 구해 targetRect에 종횡비 유지로 fit + 중앙 정렬
+  // (고정 배율이 아닌 이유: 사용자마다 부호를 쓰는 크기가 제각각이라서)
+  function fitStrokesToRect(strokes, rect) {
+    const bbox = computeBBox(strokes);
+    if (!bbox) return strokes;
+    const [rx1, ry1, rx2, ry2] = rect;
+    const rectW = rx2 - rx1, rectH = ry2 - ry1;
+    const bboxW = Math.max(bbox.width, 1);
+    const bboxH = Math.max(bbox.height, 1);
+    const scale = Math.min(rectW / bboxW, rectH / bboxH);
+    const scaledW = bboxW * scale, scaledH = bboxH * scale;
+    const offsetX = rx1 + (rectW - scaledW) / 2 - bbox.minX * scale;
+    const offsetY = ry1 + (rectH - scaledH) / 2 - bbox.minY * scale;
+    return transformStrokes(strokes, ([x, y]) => [x * scale + offsetX, y * scale + offsetY], scale);
+  }
+
+  // 파생 글자 하나를 합성. 준비 조건 미충족 시 null. 결과는 저장하지 않고 항상 재계산.
+  function composeGlyph(char) {
+    const info = DERIVED[char];
+    if (!info) return null;
+    const baseGlyph = project.glyphs[info.base];
+    if (!baseGlyph || baseGlyph.strokes.length === 0) return null;
+
+    if (info.kind === 'small') {
+      const rules = COMPOSE_RULES.small;
+      return scaleFromAnchor(baseGlyph.strokes, rules.scale, rules.anchor);
+    }
+
+    // dakuten / handakuten
+    const markChar = info.kind === 'dakuten' ? '゛' : '゜';
+    const markGlyph = project.glyphs[markChar];
+    if (!markGlyph || markGlyph.strokes.length === 0) return null;
+    const rules = COMPOSE_RULES.voiced;
+    const baseStrokes = scaleFromAnchor(baseGlyph.strokes, rules.baseScale, rules.baseAnchor);
+    const markStrokes = fitStrokesToRect(markGlyph.strokes, rules.markTargetRect);
+    return [...baseStrokes, ...markStrokes];
+  }
+
+  // 합성 결과 캐시 — onGlyphChange에서 영향받는 글자만 골라 무효화 (전체 무효화 금지)
+  const composedCache = new Map(); // char -> strokes | null
+
+  function getComposedStrokes(char) {
+    if (composedCache.has(char)) return composedCache.get(char);
+    const result = composeGlyph(char);
+    composedCache.set(char, result);
+    return result;
+  }
+
+  // 우선순위: ① 직접 쓴 글자 → ② 합성 결과 (S5의 파생 글자 직접 덮어쓰기가 이 우선순위로 구현됨)
+  function getGlyphStrokes(char) {
+    const direct = project.glyphs[char];
+    if (direct && direct.strokes.length > 0) return direct.strokes;
+    return getComposedStrokes(char);
+  }
+
+  // 폰트에 렌더 가능한 전체 글자 목록 (직접 + 합성)
+  function getAvailableChars() {
+    const result = [];
+    for (const c of ALL_CHARS) if (isCharDone(c)) result.push(c);
+    for (const c of Object.keys(DERIVED)) if (getGlyphStrokes(c)) result.push(c);
+    return result;
+  }
+
+  // char가 바뀌었을 때 무효화해야 할 전체 대상(자기 자신 + 이 글자를 재료로 쓰는 파생 글자들)
+  function getAffectedChars(char) {
+    const set = new Set([char]);
+    const deps = DERIVED_DEPS.get(char);
+    if (deps) for (const d of deps) set.add(d);
+    return set;
+  }
+
   function getProgressText() {
     const n = getCompletedChars().length;
-    return `기본 157자 중 ${n}자`;
-    // S3: "폰트에는 M자 준비됨" (M = N + 자동 합성분) 문구 추가 예정
+    const m = getAvailableChars().length;
+    return `기본 157자 중 ${n}자 · 폰트에 ${m}자 준비됨`;
   }
 
+  let lastAvailableCount = 0;
   function updateProgressBar() {
     const n = getCompletedChars().length;
+    const m = getAvailableChars().length;
     progressFillEl.style.width = `${(n / ALL_CHARS.length) * 100}%`;
     progressTextEl.textContent = getProgressText();
+    // "적게 쓰고 많이 얻는다" 체감을 위한 강조 애니메이션 — M이 늘어날 때만
+    if (m > lastAvailableCount) {
+      progressTextEl.classList.remove('flash');
+      void progressTextEl.offsetWidth; // 강제 리플로우로 애니메이션 재시작
+      progressTextEl.classList.add('flash');
+    }
+    lastAvailableCount = m;
   }
 
-  // S3: 여기서 합성 엔진 트리거(파생 글자 재계산) + 실시간 미리보기 갱신이 연결됨
+  // ═══════════════════════════════════════════════════════════
+  // 파생 글자 확인 패널 (읽기 전용)
+  // ═══════════════════════════════════════════════════════════
+
+  const derivedCellRefs = new Map(); // char -> { wrapper }
+
+  function renderDerivedPanel() {
+    derivedGridEl.innerHTML = '';
+    derivedCellRefs.clear();
+    for (const char of Object.keys(DERIVED)) {
+      const wrapper = document.createElement('button');
+      wrapper.type = 'button';
+      wrapper.className = 'derived-cell';
+      wrapper.addEventListener('click', () => showToast('직접 다듬는 기능은 곧 제공됩니다')); // S5 예정
+      derivedGridEl.appendChild(wrapper);
+      derivedCellRefs.set(char, { wrapper });
+      renderDerivedCellContent(char);
+    }
+  }
+
+  function renderDerivedCellContent(char) {
+    const cell = derivedCellRefs.get(char);
+    if (!cell) return;
+    const wrapper = cell.wrapper;
+    wrapper.innerHTML = '';
+
+    const glyphBox = document.createElement('div');
+    glyphBox.className = 'derived-cell-glyph';
+
+    const strokes = getComposedStrokes(char);
+    if (strokes) {
+      const px = CONFIG.GRID_CELL_SIZE;
+      const dpr = window.devicePixelRatio || 1;
+      const thumb = document.createElement('canvas');
+      thumb.width = px * dpr;
+      thumb.height = px * dpr;
+      thumb.style.width = px + 'px';
+      thumb.style.height = px + 'px';
+      renderStrokes(thumb.getContext('2d'), strokes, { scale: (px * dpr) / CONFIG.LOGICAL_SIZE });
+      glyphBox.appendChild(thumb);
+      wrapper.classList.add('ready');
+      wrapper.classList.remove('pending');
+    } else {
+      const span = document.createElement('span');
+      span.className = 'derived-cell-char';
+      span.textContent = char;
+      glyphBox.appendChild(span);
+      wrapper.classList.add('pending');
+      wrapper.classList.remove('ready');
+    }
+    wrapper.appendChild(glyphBox);
+
+    const info = DERIVED[char];
+    const badge = document.createElement('span');
+    badge.className = 'derived-cell-badge';
+    badge.textContent = info.kind === 'small' ? info.base : `${info.base}+${info.kind === 'dakuten' ? '゛' : '゜'}`;
+    wrapper.appendChild(badge);
+  }
+
+  function updateDerivedPanelCells(affectedSet) {
+    for (const c of affectedSet) {
+      if (DERIVED[c]) renderDerivedCellContent(c);
+    }
+  }
+
+  let derivedPanelExpanded = false;
+  derivedPanelToggleEl.addEventListener('click', () => {
+    derivedPanelExpanded = !derivedPanelExpanded;
+    derivedGridEl.hidden = !derivedPanelExpanded;
+    derivedPanelToggleEl.querySelector('.toggle-arrow').textContent = derivedPanelExpanded ? '▾' : '▸';
+  });
+
+  let toastTimer = null;
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('visible');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('visible'), CONFIG.TOAST_DURATION_MS);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 실시간 미리보기
+  // ═══════════════════════════════════════════════════════════
+
+  const PREVIEW_SENTENCES = [
+    'いろはにほへと ちりぬるを',
+    'カタカナ フォント テスト',
+    'がぎぐげご ぱぴぷぺぽ っしょ',      // 합성 품질 확인용
+    'わたしの手書きフォント 2026 ABC abc',
+  ];
+
+  function isLatinDigitChar(ch) {
+    return /[A-Za-z0-9]/.test(ch);
+  }
+
+  function getProportionalAdvanceEm(strokes) {
+    const bbox = computeBBox(strokes);
+    if (!bbox) return 0.38;
+    const widthEm = bbox.width / CONFIG.LOGICAL_SIZE + 0.12; // 좌우 여백 0.06em씩
+    return Math.max(0.38, widthEm);
+  }
+
+  function getPlaceholderAdvanceEm(char) {
+    if (char === ' ') return 0.5;
+    if (isLatinDigitChar(char)) return 0.5; // 실측 bbox가 없으므로 대략값
+    return 1; // 가나·한자·전각 부호 등은 정사각 칸
+  }
+
+  function roundRectPath(pctx, x, y, w, h, r) {
+    pctx.beginPath();
+    pctx.moveTo(x + r, y);
+    pctx.arcTo(x + w, y, x + w, y + h, r);
+    pctx.arcTo(x + w, y + h, x, y + h, r);
+    pctx.arcTo(x, y + h, x, y, r);
+    pctx.arcTo(x, y, x + w, y, r);
+    pctx.closePath();
+  }
+
+  // 미지원 글자: 연회색 둥근 사각형 + 흐린 회색 시스템 폰트 문자
+  function drawPlaceholderCell(pctx, w, h, char) {
+    pctx.save();
+    pctx.fillStyle = '#e5dccb';
+    roundRectPath(pctx, 2, 2, w - 4, h - 4, Math.min(w, h) * 0.12);
+    pctx.fill();
+    if (char !== ' ') {
+      pctx.fillStyle = 'rgba(58,52,44,0.3)';
+      pctx.font = `${Math.floor(h * 0.6)}px "Pretendard", "Noto Sans KR", sans-serif`;
+      pctx.textAlign = 'center';
+      pctx.textBaseline = 'middle';
+      pctx.fillText(char, w / 2, h / 2 + h * 0.03);
+    }
+    pctx.restore();
+  }
+
+  // 문자 하나를 기준 해상도(REF)의 오프스크린 캔버스에 렌더 (폭은 advanceEm 비율)
+  function renderCharOffscreen(char) {
+    const REF = CONFIG.PREVIEW_REF_PX;
+    const strokes = getGlyphStrokes(char);
+
+    if (!strokes) {
+      const advanceEm = getPlaceholderAdvanceEm(char);
+      const canvasW = Math.max(1, Math.round(advanceEm * REF));
+      const off = document.createElement('canvas');
+      off.width = canvasW;
+      off.height = REF;
+      drawPlaceholderCell(off.getContext('2d'), canvasW, REF, char);
+      return { canvas: off, advanceEm };
+    }
+
+    const proportional = isLatinDigitChar(char);
+    const advanceEm = proportional ? getProportionalAdvanceEm(strokes) : 1;
+    const canvasW = Math.max(1, Math.round(advanceEm * REF));
+    const off = document.createElement('canvas');
+    off.width = canvasW;
+    off.height = REF;
+    const octx = off.getContext('2d');
+    const s = REF / CONFIG.LOGICAL_SIZE;
+    if (proportional) {
+      const bbox = computeBBox(strokes);
+      const bearing = 0.06 * REF;
+      renderStrokes(octx, strokes, { scale: s, offsetX: -bbox.minX * s + bearing, offsetY: 0 });
+    } else {
+      renderStrokes(octx, strokes, { scale: s });
+    }
+    return { canvas: off, advanceEm };
+  }
+
+  // 문자별 렌더 캐시 — 같은 글자는 한 번만 그림. 폰트 크기와 무관한 기준 해상도로 캐시하므로
+  // 크기 슬라이더 변경 시에는 무효화 없이 합성(drawImage) 단계에서만 다시 스케일하면 됨.
+  const previewCharCache = new Map(); // char -> { canvas, advanceEm }
+
+  function getPreviewCharImage(char) {
+    if (previewCharCache.has(char)) return previewCharCache.get(char);
+    const result = renderCharOffscreen(char);
+    previewCharCache.set(char, result);
+    return result;
+  }
+
+  function renderPreviewLine(lineEl, text) {
+    const fontSizePx = Number(previewSizeSliderEl.value);
+    const dpr = window.devicePixelRatio || 1;
+    const parts = [];
+    let totalWidthPx = 0;
+    for (const ch of [...text]) {
+      if (ch === ' ') {
+        const widthPx = fontSizePx * 0.5;
+        parts.push({ space: true, widthPx });
+        totalWidthPx += widthPx;
+        continue;
+      }
+      const { canvas: img, advanceEm } = getPreviewCharImage(ch);
+      const widthPx = advanceEm * fontSizePx;
+      parts.push({ img, widthPx });
+      totalWidthPx += widthPx;
+    }
+
+    const lineCanvas = document.createElement('canvas');
+    lineCanvas.width = Math.max(1, Math.ceil(totalWidthPx * dpr));
+    lineCanvas.height = Math.ceil(fontSizePx * dpr);
+    lineCanvas.style.width = totalWidthPx + 'px';
+    lineCanvas.style.height = fontSizePx + 'px';
+    const lctx = lineCanvas.getContext('2d');
+    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    let x = 0;
+    for (const part of parts) {
+      if (!part.space) lctx.drawImage(part.img, x, 0, part.widthPx, fontSizePx);
+      x += part.widthPx;
+    }
+
+    lineEl.innerHTML = '';
+    lineEl.appendChild(lineCanvas);
+  }
+
+  function refreshPreview() {
+    const hasAnyGlyph = getAvailableChars().length > 0;
+    previewPlaceholderEl.hidden = hasAnyGlyph;
+    previewLinesEl.hidden = !hasAnyGlyph;
+    previewFreeRowEl.hidden = !hasAnyGlyph;
+    if (!hasAnyGlyph) return;
+
+    previewLinesEl.innerHTML = '';
+    for (const sentence of PREVIEW_SENTENCES) {
+      const row = document.createElement('div');
+      row.className = 'preview-line';
+      previewLinesEl.appendChild(row);
+      renderPreviewLine(row, sentence);
+    }
+    renderPreviewLine(previewFreeLineEl, previewFreeInputEl.value);
+  }
+
+  let previewDebounceTimer = null;
+  function schedulePreviewRerender() {
+    if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+    previewDebounceTimer = setTimeout(() => {
+      refreshPreview();
+      previewDebounceTimer = null;
+    }, CONFIG.PREVIEW_DEBOUNCE_MS);
+  }
+
+  previewSizeSliderEl.addEventListener('input', () => {
+    previewSizeValueEl.textContent = `${previewSizeSliderEl.value}px`;
+    refreshPreview(); // 크기 조정은 캐시된 오프스크린 이미지를 다시 스케일만 하므로 즉시 반영
+  });
+
+  previewFreeInputEl.addEventListener('input', () => {
+    schedulePreviewRerender();
+  });
+
+  // S3: 합성 엔진 트리거(파생 글자 캐시 무효화) + 파생 패널·진행바·미리보기 갱신
   function onGlyphChange(char) {
-    // TODO: S3
+    const affected = getAffectedChars(char);
+    for (const c of affected) {
+      composedCache.delete(c);
+      previewCharCache.delete(c);
+    }
+    updateDerivedPanelCells(affected);
+    updateProgressBar();
+    schedulePreviewRerender();
   }
 
-  // ── 글자 완료 시점마다 project.glyphs와 화면(그리드·진행바·저장)을 동기화 ──
+  // ── 글자 완료 시점마다 project.glyphs와 화면(그리드·진행바·합성·미리보기·저장)을 동기화 ──
   function syncCurrentGlyph() {
     const char = state.currentChar;
     if (state.strokes.length > 0) {
@@ -841,7 +1475,6 @@
     }
     updateGlyphCell(char);
     updateGroupTabCount(CHAR_TO_GROUP.get(char));
-    updateProgressBar();
     onGlyphChange(char);
     scheduleSave();
   }
@@ -1067,6 +1700,10 @@
     prevMid = null;
     activePointerId = null;
 
+    composedCache.clear();
+    previewCharCache.clear();
+    lastAvailableCount = 0;
+
     syncBrushSizeUI();
     redrawAll();
     updateButtonStates();
@@ -1074,7 +1711,9 @@
     allCompleteBanner.hidden = true;
     renderGroupTabs();
     selectGroup(CHARSET[0].id);
+    renderDerivedPanel();
     updateProgressBar();
+    refreshPreview();
     persistProject();
   });
 
@@ -1105,10 +1744,19 @@
     selectGroup(currentGroupId);
     syncBrushSizeUI();
     updateCharUI();
-    updateProgressBar();
     renderAutosaveStatus(); // updatedAt=0이면 상태 텍스트 비움 (아직 저장된 적 없음)
     resizeCanvas();
     updateButtonStates();
+
+    // 파생 패널·미리보기 초기 렌더 (합성은 저장되지 않으므로 복원된 원본에서 항상 재계산됨)
+    renderDerivedPanel();
+    previewSizeSliderEl.min = CONFIG.PREVIEW_MIN_SIZE;
+    previewSizeSliderEl.max = CONFIG.PREVIEW_MAX_SIZE;
+    previewSizeSliderEl.value = CONFIG.PREVIEW_DEFAULT_SIZE;
+    previewSizeValueEl.textContent = `${CONFIG.PREVIEW_DEFAULT_SIZE}px`;
+    lastAvailableCount = getAvailableChars().length; // 최초 로드 시 강조 애니메이션 방지
+    updateProgressBar();
+    refreshPreview();
   }
 
   init();
