@@ -109,6 +109,94 @@
     font-family: inherit;
   }
 
+  .sync-wrap {
+    position: relative;
+  }
+
+  .sync-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 260px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 14px;
+    box-shadow: 0 4px 16px rgba(26,26,26,0.12);
+    font-size: 13px;
+    color: var(--color-text);
+    z-index: 1200;
+  }
+
+  .sync-status {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--color-text);
+    word-break: break-all;
+  }
+
+  .sync-save-btn {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  .sync-newcode-link {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .sync-divider {
+    height: 1px;
+    background: var(--color-guide);
+    margin: 10px 0;
+  }
+
+  .sync-label {
+    display: block;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+  }
+
+  .sync-load-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .sync-load-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--color-text);
+  }
+
+  .sync-load-btn {
+    width: auto;
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .sync-note {
+    margin: 10px 0 0;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
   .header-progress {
     display: flex;
     align-items: center;
@@ -1066,6 +1154,21 @@
         <p><kbd>Ctrl</kbd>+<kbd>Z</kbd> 한 획 지우기</p>
       </div>
     </div>
+    <div class="sync-wrap">
+      <button type="button" class="action-btn header-reset" id="syncBtn">동기화</button>
+      <div class="sync-popover" id="syncPopover" hidden>
+        <p class="sync-status" id="syncStatusText">아직 동기화 코드가 없습니다.</p>
+        <button type="button" class="action-btn sync-save-btn" id="syncSaveBtn">동기화 코드 만들기</button>
+        <button type="button" class="sync-newcode-link" id="syncNewCodeLink" hidden>새 코드 발급</button>
+        <div class="sync-divider"></div>
+        <label for="syncLoadInput" class="sync-label">다른 기기의 코드 불러오기</label>
+        <div class="sync-load-row">
+          <input type="text" id="syncLoadInput" class="sync-load-input" maxlength="6" inputmode="numeric" placeholder="6자리 코드">
+          <button type="button" class="action-btn sync-load-btn" id="syncLoadBtn">불러오기</button>
+        </div>
+        <p class="sync-note">코드를 아는 사람은 누구나 이 코드로 프로젝트를 열람·수정할 수 있습니다. 안전하게 보관하세요.</p>
+      </div>
+    </div>
     <button class="action-btn header-reset" id="backupBtn">백업</button>
     <button class="action-btn header-reset" id="restoreBtn">복원</button>
     <input type="file" id="restoreFileInput" accept=".json,.tegaki.json" hidden>
@@ -1209,6 +1312,49 @@
 </div><!-- /#studioView -->
 
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+
+<!--
+  v2 동기화 기능(6자리 코드 ↔ Firestore)만을 위한 다리 역할의 모듈 스크립트.
+  이 프로젝트는 "빌드 없는 단일 index.html"이 원칙이라 npm 의존성 대신
+  gstatic CDN에서 ESM으로 바로 불러온다. 아래 firebaseConfig의 apiKey는
+  Firebase 웹 앱의 공개 식별자일 뿐 비밀값이 아니며(실제 접근 제어는
+  firestore.rules의 6자리 코드 매칭 규칙이 담당), 클라이언트 코드에
+  그대로 노출해도 안전하다.
+  모듈 스크립트는 클래식 스크립트보다 항상 늦게 실행되므로, 아래
+  window.FirebaseSync는 본문 스크립트의 init() 실행 이후에 준비된다 —
+  버튼 클릭 등 실제 사용자 상호작용 시점에는 항상 준비되어 있다.
+-->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    projectId: "my-hirakana",
+    appId: "1:476087955567:web:ab57349a8c3a1036115d9a",
+    storageBucket: "my-hirakana.firebasestorage.app",
+    apiKey: "AIzaSyAtJ2bu28DK_4UgtA9BxlL9wynETEU6zZI",
+    authDomain: "my-hirakana.firebaseapp.com",
+    messagingSenderId: "476087955567",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.FirebaseSync = {
+    // code: "483920" 같은 6자리 문자열, jsonString: simplifyProjectForSave(project) 직렬화 결과
+    async save(code, jsonString) {
+      await setDoc(doc(db, 'syncCodes', code), { data: jsonString, updatedAt: serverTimestamp() });
+    },
+    // 문서가 없으면 null, 있으면 저장했던 JSON 문자열 그대로 반환
+    async load(code) {
+      const snap = await getDoc(doc(db, 'syncCodes', code));
+      if (!snap.exists()) return null;
+      return snap.data().data;
+    },
+  };
+</script>
 <script>
   // ── 설정값: 모든 튜닝 상수를 이곳에 모아 관리 ──
   const CONFIG = {
@@ -2883,6 +3029,111 @@
     reader.readAsText(file);
   });
 
+  // ═══════════════════════════════════════════════════════════
+  // v2: 6자리 코드 동기화 (Firestore) — JSON 백업과 동일한 project 직렬화를
+  // 재사용하되, 파일 대신 클라우드 문서 하나에 저장/조회한다.
+  // ═══════════════════════════════════════════════════════════
+
+  const SYNC_CODE_KEY = 'tegaki-sync-code';
+  const syncBtn = document.getElementById('syncBtn');
+  const syncPopoverEl = document.getElementById('syncPopover');
+  const syncStatusTextEl = document.getElementById('syncStatusText');
+  const syncSaveBtn = document.getElementById('syncSaveBtn');
+  const syncNewCodeLink = document.getElementById('syncNewCodeLink');
+  const syncLoadInput = document.getElementById('syncLoadInput');
+  const syncLoadBtn = document.getElementById('syncLoadBtn');
+
+  let activeSyncCode = localStorage.getItem(SYNC_CODE_KEY) || null;
+
+  function generateSyncCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  function renderSyncStatus() {
+    if (activeSyncCode) {
+      syncStatusTextEl.textContent = `동기화 코드: ${activeSyncCode}`;
+      syncSaveBtn.textContent = '지금 상태를 코드로 저장';
+      syncNewCodeLink.hidden = false;
+    } else {
+      syncStatusTextEl.textContent = '아직 동기화 코드가 없습니다.';
+      syncSaveBtn.textContent = '동기화 코드 만들기';
+      syncNewCodeLink.hidden = true;
+    }
+  }
+
+  syncBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    syncPopoverEl.hidden = !syncPopoverEl.hidden;
+  });
+  document.addEventListener('click', (e) => {
+    if (syncPopoverEl.hidden) return;
+    if (e.target === syncBtn || syncPopoverEl.contains(e.target)) return;
+    syncPopoverEl.hidden = true;
+  });
+
+  async function saveToCloud(forceNewCode) {
+    if (!window.FirebaseSync) {
+      showToast('동기화 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    const code = (forceNewCode || !activeSyncCode) ? generateSyncCode() : activeSyncCode;
+    syncSaveBtn.disabled = true;
+    try {
+      const json = JSON.stringify(simplifyProjectForSave(project));
+      await window.FirebaseSync.save(code, json);
+      activeSyncCode = code;
+      localStorage.setItem(SYNC_CODE_KEY, code);
+      renderSyncStatus();
+      showToast(`동기화 코드 ${code}로 저장했습니다`);
+    } catch (err) {
+      console.error('[동기화 저장 실패]', err); // 문제 발생 시 1차 점검용
+      showToast('동기화 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      syncSaveBtn.disabled = false;
+    }
+  }
+
+  syncSaveBtn.addEventListener('click', () => saveToCloud(false));
+  syncNewCodeLink.addEventListener('click', () => {
+    if (!confirm('새 코드를 발급하면 지금 상태가 기존 코드와는 별개의 새 코드로 저장됩니다. 계속할까요?')) return;
+    saveToCloud(true);
+  });
+
+  syncLoadBtn.addEventListener('click', async () => {
+    const code = syncLoadInput.value.trim();
+    if (!/^[0-9]{6}$/.test(code)) {
+      showToast('6자리 숫자 코드를 입력해 주세요');
+      return;
+    }
+    if (!window.FirebaseSync) {
+      showToast('동기화 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    if (Object.keys(project.glyphs).length > 0) {
+      if (!confirm('현재 작업을 이 코드의 내용으로 교체합니다. 계속할까요?')) return;
+    }
+    syncLoadBtn.disabled = true;
+    try {
+      const json = await window.FirebaseSync.load(code);
+      if (!json) {
+        showToast('해당 코드를 찾을 수 없습니다');
+        return;
+      }
+      const data = JSON.parse(json);
+      applyRestoredProject(data);
+      activeSyncCode = code;
+      localStorage.setItem(SYNC_CODE_KEY, code);
+      renderSyncStatus();
+      syncLoadInput.value = '';
+      showToast('동기화 코드로 불러왔습니다');
+    } catch (err) {
+      console.error('[동기화 불러오기 실패]', err); // 문제 발생 시 1차 점검용
+      showToast('불러오기에 실패했습니다. 코드나 네트워크 상태를 확인해 주세요.');
+    } finally {
+      syncLoadBtn.disabled = false;
+    }
+  });
+
   // ── 초기화: localStorage 복원 또는 새 프로젝트 ──
   function init() {
     const loaded = StorageAdapter.load();
@@ -3095,6 +3346,7 @@
   setupDemoCanvas();
   renderDemoSample();
   renderLandingCta();
+  renderSyncStatus();
 </script>
 
 </body>
