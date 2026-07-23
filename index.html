@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>手書き글꼴 — 내 손글씨로 일본어 폰트 만들기</title>
-<meta name="description" content="157자만 손으로 쓰면 탁음·반탁음·작은 글자까지 260자 일본어 폰트가 자동 완성됩니다. 설치 가능한 .otf 파일로 내려받아 바로 쓸 수 있어요.">
-<meta property="og:title" content="手書き글꼴 — 내 손글씨로 일본어 폰트 만들기">
-<meta property="og:description" content="157자만 쓰면, 260자 폰트가 완성됩니다. 탁음도, 작은 っ도, 엔진이 알아서 짓습니다.">
+<title>My Hirakana — 내 손글씨로 일본어 폰트 만들기</title>
+<meta name="description" content="히라가나와 가타카나를 직접 쓰고, 탁음·반탁음·작은 글자까지 더해 나만의 일본어 OTF 폰트를 만드는 웹앱입니다.">
+<meta property="og:title" content="My Hirakana — 내 손글씨로 일본어 폰트 만들기">
+<meta property="og:description" content="한 글자씩 정성껏 쓰면, 세상에 하나뿐인 일본어 손글씨 폰트가 완성됩니다.">
 <!-- og:image: 대표 스크린샷/데모 GIF 준비되면 추가 -->
 
 <style>
@@ -1074,16 +1074,1102 @@
       70%, 100% { transform: translate(-22px, 6px); opacity: 0; }
     }
   }
+
+  /* ══════════════ v1.1 · 따뜻한 일본 문구점 ══════════════ */
+  :root {
+    --color-bg: #f5efe3;
+    --color-canvas-bg: #fffdf8;
+    --color-border: #d6c8b5;
+    --color-guide: #e7ddce;
+    --color-accent: #c95842;
+    --color-accent-dark: #9f3f31;
+    --color-accent-soft: #f6e1da;
+    --color-indigo: #465c72;
+    --color-indigo-soft: #e8edf1;
+    --color-ink: #292622;
+    --color-text: #3f3932;
+    --color-text-muted: #827668;
+    --color-paper: #fffaf0;
+    --color-paper-deep: #eee4d3;
+    --shadow-paper: 0 14px 34px rgba(73, 58, 39, 0.09);
+    --shadow-card: 0 4px 14px rgba(73, 58, 39, 0.07);
+    --radius-card: 18px;
+  }
+
+  html {
+    background: #e9dfd0;
+  }
+
+  body {
+    min-width: 0;
+    overflow-x: hidden;
+    background:
+      linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.18)),
+      repeating-linear-gradient(
+        0deg,
+        transparent 0,
+        transparent 31px,
+        rgba(114, 91, 60, 0.028) 31px,
+        rgba(114, 91, 60, 0.028) 32px
+      ),
+      var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  button,
+  label,
+  input {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  .glyph-cell:focus-visible,
+  .derived-cell:focus-visible {
+    outline: 3px solid rgba(70, 92, 114, 0.32);
+    outline-offset: 3px;
+  }
+
+  /* 랜딩: 한 장의 문구점 카탈로그처럼 */
+  #landingView {
+    width: min(1120px, calc(100% - 40px));
+    max-width: none;
+    margin: 32px auto 56px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.06fr) minmax(360px, 0.94fr);
+    gap: 24px;
+  }
+
+  .landing-hero,
+  .landing-demo-section,
+  .landing-principle,
+  .landing-steps {
+    border: 1px solid rgba(177, 155, 124, 0.48);
+    border-radius: var(--radius-card);
+    background: rgba(255, 250, 240, 0.9);
+    box-shadow: var(--shadow-paper);
+  }
+
+  .landing-hero {
+    min-height: 500px;
+    padding: 68px 58px 56px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .landing-hero::before,
+  .landing-hero::after {
+    content: "";
+    position: absolute;
+    border: 1px solid rgba(201, 88, 66, 0.18);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .landing-hero::before {
+    width: 240px;
+    height: 240px;
+    right: -96px;
+    top: -84px;
+  }
+
+  .landing-hero::after {
+    width: 150px;
+    height: 150px;
+    right: -54px;
+    top: -38px;
+  }
+
+  .landing-hero-logo {
+    margin: 0 0 32px;
+    padding: 7px 13px 6px;
+    border: 1px solid rgba(201, 88, 66, 0.48);
+    border-radius: 999px;
+    color: var(--color-accent-dark);
+    background: rgba(255,255,255,0.52);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Batang", serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .landing-hero-title {
+    max-width: 620px;
+    margin: 0 0 18px;
+    color: var(--color-ink);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Batang", serif;
+    font-size: clamp(34px, 4.2vw, 54px);
+    line-height: 1.32;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .landing-title-line {
+    display: block;
+  }
+
+  .landing-hero-copy {
+    max-width: 480px;
+    margin: 0 0 34px;
+    color: var(--color-text-muted);
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  button.action-btn.landing-cta-btn {
+    width: auto;
+    min-height: 52px;
+    padding: 13px 25px;
+    border: 1px solid var(--color-accent);
+    border-radius: 12px;
+    background: var(--color-accent);
+    color: #fffaf2;
+    box-shadow: 0 8px 18px rgba(159, 63, 49, 0.18);
+  }
+
+  button.action-btn.landing-cta-btn:hover:not(:disabled) {
+    border-color: var(--color-accent-dark);
+    background: var(--color-accent-dark);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .landing-restart-link {
+    color: var(--color-indigo);
+  }
+
+  .landing-demo-section {
+    min-height: 500px;
+    padding: 42px 34px 30px;
+    border-top: 1px solid rgba(177, 155, 124, 0.48);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .landing-demo {
+    gap: 24px;
+  }
+
+  .landing-demo-canvas {
+    width: min(240px, 100%);
+    height: auto;
+    aspect-ratio: 1;
+    border: 1px solid #c8b89f;
+    border-radius: 8px;
+    background-color: var(--color-canvas-bg);
+    background-image:
+      linear-gradient(rgba(201, 88, 66, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 88, 66, 0.08) 1px, transparent 1px);
+    background-size: 50% 50%;
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,0.48), var(--shadow-card);
+  }
+
+  .landing-demo-sample-wrap {
+    min-width: 190px;
+  }
+
+  .landing-demo-sample-label {
+    color: var(--color-accent-dark);
+    letter-spacing: 0.08em;
+  }
+
+  .landing-demo-note {
+    margin-top: 28px;
+    font-style: normal;
+  }
+
+  .landing-principle {
+    grid-column: 1 / -1;
+    padding: 28px 36px;
+    border-top: 1px solid rgba(177, 155, 124, 0.48);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+  }
+
+  .principle-stage {
+    flex: 0 0 310px;
+    height: 92px;
+    border-radius: 12px;
+    background:
+      linear-gradient(rgba(70, 92, 114, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(70, 92, 114, 0.035) 1px, transparent 1px),
+      #fffdf8;
+    background-size: 23px 23px;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  }
+
+  .principle-caption {
+    max-width: 320px;
+    margin: 0;
+    color: var(--color-ink);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Batang", serif;
+    font-size: 20px;
+    line-height: 1.55;
+    text-align: left;
+  }
+
+  .landing-steps {
+    grid-column: 1 / -1;
+    gap: 0;
+    padding: 0;
+    border-top: 1px solid rgba(177, 155, 124, 0.48);
+    overflow: hidden;
+  }
+
+  .landing-step {
+    min-height: 178px;
+    padding: 32px 28px;
+    text-align: left;
+  }
+
+  .landing-step + .landing-step {
+    border-left: 1px solid var(--color-guide);
+  }
+
+  .landing-step-num {
+    margin: 0 0 16px;
+    border: 1px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-accent-dark);
+    text-align: center;
+  }
+
+  .landing-step h3 {
+    color: var(--color-ink);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Batang", serif;
+    font-size: 17px;
+  }
+
+  .landing-step p {
+    line-height: 1.65;
+  }
+
+  .landing-footer {
+    grid-column: 1 / -1;
+    padding: 8px 0 0;
+    border: 0;
+  }
+
+  /* 스튜디오 상단: 도구 상자처럼 간결하게 */
+  #studioView {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #studioView > header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: auto minmax(280px, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    padding: 13px max(22px, calc((100% - 1180px) / 2));
+    border-bottom: 1px solid rgba(177, 155, 124, 0.48);
+    background: rgba(248, 242, 231, 0.94);
+    box-shadow: 0 6px 18px rgba(73, 58, 39, 0.06);
+    backdrop-filter: blur(12px);
+  }
+
+  .header-logo {
+    color: var(--color-accent-dark);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Batang", serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .header-progress {
+    min-width: 0;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.48);
+  }
+
+  .progress-bar {
+    height: 7px;
+    background: #dfd5c5;
+  }
+
+  .progress-fill {
+    background: linear-gradient(90deg, var(--color-accent), #d88967);
+  }
+
+  .progress-text,
+  .autosave-status {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-actions {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .header-actions button.action-btn {
+    width: auto;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 11px;
+    border-color: rgba(177, 155, 124, 0.66);
+    border-radius: 9px;
+    background: rgba(255,253,248,0.82);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .header-actions .header-help {
+    width: 40px;
+    padding-inline: 0;
+  }
+
+  .header-actions #resetAllBtn {
+    color: #9b756b;
+  }
+
+  .help-popover,
+  .sync-popover {
+    border-radius: 12px;
+    border-color: rgba(177, 155, 124, 0.66);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-paper);
+  }
+
+  /* 작업대 */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 164px minmax(0, 1fr);
+    gap: 24px;
+    width: min(1180px, calc(100% - 40px));
+    max-width: none;
+    margin: 28px auto 0;
+    padding: 0;
+  }
+
+  .group-tabs {
+    position: sticky;
+    top: 88px;
+    flex: none;
+    width: 164px;
+    padding: 12px;
+    border: 1px solid rgba(177, 155, 124, 0.48);
+    border-radius: 14px;
+    background: rgba(255, 250, 240, 0.82);
+    box-shadow: var(--shadow-card);
+  }
+
+  .group-tabs::before {
+    content: "INDEX";
+    padding: 3px 5px 9px;
+    color: var(--color-text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+  }
+
+  .group-tab {
+    min-height: 45px;
+    border-color: transparent;
+    border-radius: 9px;
+    background: transparent;
+  }
+
+  .group-tab:hover {
+    background: rgba(70, 92, 114, 0.06);
+  }
+
+  .group-tab.active {
+    border-color: rgba(201, 88, 66, 0.42);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-dark);
+    box-shadow: inset 3px 0 0 var(--color-accent);
+  }
+
+  .optional-badge {
+    border-color: rgba(70, 92, 114, 0.22);
+    color: var(--color-indigo);
+  }
+
+  .main-content {
+    min-width: 0;
+  }
+
+  .prompt {
+    margin: 0 0 12px;
+    padding: 0 4px;
+  }
+
+  .prompt h2 {
+    color: var(--color-ink);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Batang", serif;
+    font-size: 25px;
+    line-height: 1.4;
+  }
+
+  .prompt h2::first-letter {
+    color: var(--color-accent);
+  }
+
+  #currentChar {
+    display: inline-grid;
+    place-items: center;
+    min-width: 48px;
+    min-height: 48px;
+    margin-left: 4px;
+    border: 1px solid rgba(201, 88, 66, 0.35);
+    border-radius: 50%;
+    background: rgba(255,250,240,0.88);
+    color: var(--color-accent-dark);
+    font-size: 32px;
+    vertical-align: middle;
+  }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(420px, 1fr) 240px;
+    gap: 20px;
+    min-width: 0;
+    align-items: stretch;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    max-width: 640px;
+    padding: 12px;
+    border: 1px solid rgba(177, 155, 124, 0.48);
+    border-radius: 14px;
+    background: rgba(255, 250, 240, 0.82);
+    box-shadow: var(--shadow-paper);
+  }
+
+  #kanaCanvas {
+    border: 1px solid #c8b89f;
+    border-radius: 7px;
+    background-color: var(--color-canvas-bg);
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,0.42);
+  }
+
+  .controls {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid rgba(177, 155, 124, 0.48);
+    border-radius: 14px;
+    background: rgba(255, 250, 240, 0.82);
+    box-shadow: var(--shadow-card);
+  }
+
+  .control-group h3 {
+    margin-bottom: 10px;
+    color: var(--color-indigo);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .control-group br {
+    display: none;
+  }
+
+  .control-group > button + button {
+    margin-top: 8px;
+  }
+
+  .brush-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .brush-option {
+    justify-content: flex-start;
+    min-height: 42px;
+    padding: 8px 12px;
+    border-color: rgba(177, 155, 124, 0.58);
+    border-radius: 9px;
+    background: rgba(255,255,255,0.58);
+  }
+
+  .brush-option.active {
+    border-color: rgba(201, 88, 66, 0.52);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-dark);
+  }
+
+  button.action-btn {
+    border-color: rgba(177, 155, 124, 0.66);
+    border-radius: 10px;
+    background: rgba(255,253,248,0.86);
+    transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  }
+
+  button.action-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent-dark);
+    background: #fffaf2;
+  }
+
+  .nav-buttons {
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .nav-buttons .action-btn {
+    min-width: 132px;
+    padding: 11px 20px;
+  }
+
+  #nextCharBtn {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  #nextCharBtn:hover:not(:disabled) {
+    border-color: var(--color-accent-dark);
+    background: var(--color-accent-dark);
+    color: #fff;
+  }
+
+  .hint {
+    margin: 12px 4px 0;
+    font-size: 12px;
+  }
+
+  /* 글자 카드와 결과 영역 */
+  .glyph-grid-section,
+  .derived-panel-section,
+  .preview-section,
+  .export-section {
+    width: min(1180px, calc(100% - 40px));
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid rgba(177, 155, 124, 0.48);
+    border-radius: var(--radius-card);
+    background: rgba(255, 250, 240, 0.84);
+    box-shadow: var(--shadow-card);
+  }
+
+  .glyph-grid-section {
+    margin-top: 28px;
+    padding: 24px;
+  }
+
+  .glyph-grid-section::before {
+    content: "글자 목록";
+    display: block;
+    margin-bottom: 16px;
+    color: var(--color-ink);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Batang", serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .glyph-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: 8px;
+  }
+
+  .glyph-cell,
+  .derived-cell {
+    width: 100%;
+    border-color: rgba(177, 155, 124, 0.58);
+    border-radius: 9px;
+    background: #fffdf8;
+  }
+
+  .glyph-cell.empty,
+  .derived-cell.pending {
+    background: rgba(231, 221, 206, 0.5);
+  }
+
+  .glyph-cell.current {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(201, 88, 66, 0.12);
+  }
+
+  .glyph-cell-dot {
+    width: 18px;
+    height: 18px;
+    top: 3px;
+    right: 3px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(159,63,49,0.25);
+    background: var(--color-accent-soft);
+  }
+
+  .glyph-cell-dot::after {
+    content: "済";
+    color: var(--color-accent-dark);
+    font-family: serif;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .derived-panel-section {
+    margin-top: 14px;
+    padding: 14px;
+  }
+
+  .derived-panel-toggle {
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-indigo-soft);
+    color: #35495d;
+  }
+
+  .derived-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  }
+
+  .preview-section,
+  .export-section {
+    margin-top: 20px;
+    padding: 28px;
+  }
+
+  .preview-title,
+  .export-title {
+    color: var(--color-ink);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Batang", serif;
+    font-size: 20px;
+  }
+
+  .preview-size-row {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-guide);
+  }
+
+  .preview-free-input,
+  .export-field input[type="text"],
+  .sync-load-input {
+    border-color: rgba(177, 155, 124, 0.66);
+    border-radius: 9px;
+    background: #fffdf8;
+  }
+
+  .preview-free-input:focus,
+  .export-field input[type="text"]:focus,
+  .sync-load-input:focus {
+    border-color: var(--color-indigo);
+  }
+
+  .export-section {
+    margin-bottom: 64px;
+  }
+
+  .export-field {
+    max-width: 680px;
+  }
+
+  .export-scope {
+    gap: 8px;
+  }
+
+  .export-scope-option {
+    padding: 5px 12px;
+    border: 1px solid rgba(177, 155, 124, 0.58);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.45);
+  }
+
+  button.action-btn.export-btn:not(:disabled) {
+    border-color: var(--color-indigo);
+    background: var(--color-indigo);
+  }
+
+  .toast {
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    background: #313b43;
+    box-shadow: var(--shadow-paper);
+  }
+
+  @media (max-width: 980px) {
+    #studioView > header {
+      grid-template-columns: auto minmax(220px, 1fr);
+    }
+
+    .header-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+
+    .workspace {
+      grid-template-columns: minmax(360px, 1fr) 210px;
+    }
+
+    #landingView {
+      grid-template-columns: 1fr;
+    }
+
+    .landing-hero,
+    .landing-demo-section {
+      min-height: auto;
+    }
+  }
+
+  @media (max-width: 720px) {
+    #landingView {
+      width: min(100% - 24px, 560px);
+      margin: 12px auto 32px;
+      padding: 0;
+      gap: 12px;
+    }
+
+    .landing-hero {
+      padding: 42px 26px 38px;
+    }
+
+    .landing-hero-title {
+      font-size: clamp(28px, 8.4vw, 35px);
+    }
+
+    .landing-title-line {
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+
+    .landing-demo-section {
+      padding: 32px 20px 26px;
+    }
+
+    .landing-demo {
+      flex-direction: column;
+    }
+
+    .landing-demo-sample-wrap {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .landing-demo-sample-canvas {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .landing-principle {
+      flex-direction: column;
+      gap: 12px;
+      padding: 24px 18px;
+    }
+
+    .principle-stage {
+      flex-basis: auto;
+      width: 100%;
+    }
+
+    .principle-caption {
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .landing-steps {
+      gap: 0;
+    }
+
+    .landing-step {
+      min-height: 0;
+      padding: 24px;
+    }
+
+    .landing-step + .landing-step {
+      border-top: 1px solid var(--color-guide);
+      border-left: 0;
+    }
+
+    #studioView > header {
+      position: relative;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+
+    .header-progress {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      flex-wrap: wrap;
+      width: 100%;
+      padding: 8px 10px;
+    }
+
+    .header-progress .progress-bar {
+      flex-basis: 100%;
+    }
+
+    .progress-text {
+      flex: 1 1 auto;
+      white-space: normal;
+    }
+
+    .header-actions {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      display: grid;
+      grid-template-columns: 40px repeat(4, minmax(0, 1fr));
+      width: 100%;
+      gap: 6px;
+    }
+
+    .header-actions button.action-btn {
+      width: 100%;
+      padding-inline: 5px;
+      font-size: 11px;
+    }
+
+    .help-wrap,
+    .sync-wrap {
+      min-width: 0;
+    }
+
+    .sync-wrap button.action-btn {
+      width: 100%;
+    }
+
+    .help-popover,
+    .sync-popover {
+      position: fixed;
+      top: 116px;
+      right: 12px;
+      left: 12px;
+      width: auto;
+      max-width: none;
+    }
+
+    .app-layout {
+      display: flex;
+      width: 100%;
+      margin-top: 16px;
+      padding: 0 12px;
+      gap: 14px;
+    }
+
+    .group-tabs {
+      position: relative;
+      top: auto;
+      width: 100%;
+      max-width: 100%;
+      padding: 8px;
+      border-radius: 12px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+    }
+
+    .group-tabs::before {
+      display: none;
+    }
+
+    .group-tab {
+      flex: 0 0 auto;
+      min-height: 42px;
+      padding: 7px 10px;
+    }
+
+    .main-content {
+      width: 100%;
+    }
+
+    .prompt {
+      margin-bottom: 10px;
+    }
+
+    .prompt h2 {
+      font-size: 20px;
+    }
+
+    #currentChar {
+      min-width: 42px;
+      min-height: 42px;
+      font-size: 27px;
+    }
+
+    .workspace {
+      display: flex;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      max-width: none;
+      padding: 8px;
+    }
+
+    .controls {
+      width: 100%;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .brush-options {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .brush-option {
+      justify-content: center;
+      padding: 7px 4px;
+      font-size: 12px;
+    }
+
+    .control-group {
+      min-width: 0;
+    }
+
+    .nav-buttons {
+      position: sticky;
+      bottom: 8px;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid rgba(177, 155, 124, 0.54);
+      border-radius: 13px;
+      background: rgba(248, 242, 231, 0.94);
+      box-shadow: 0 8px 24px rgba(73, 58, 39, 0.14);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-buttons .action-btn {
+      width: 100%;
+      min-width: 0;
+      padding-inline: 8px;
+    }
+
+    .all-complete-banner {
+      grid-column: 1 / -1;
+    }
+
+    .glyph-grid-section,
+    .derived-panel-section,
+    .preview-section,
+    .export-section {
+      width: calc(100% - 24px);
+      padding-left: 16px;
+      padding-right: 16px;
+      border-radius: 14px;
+    }
+
+    .glyph-grid-section {
+      margin-top: 18px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .glyph-grid {
+      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      gap: 6px;
+    }
+
+    .glyph-cell {
+      height: auto;
+      aspect-ratio: 1;
+    }
+
+    .derived-grid {
+      grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+      gap: 6px;
+    }
+
+    .preview-section,
+    .export-section {
+      margin-top: 14px;
+      padding-top: 22px;
+      padding-bottom: 22px;
+    }
+
+    .preview-size-row {
+      flex-wrap: wrap;
+    }
+
+    .preview-size-row input[type="range"] {
+      flex: 1 1 160px;
+      min-width: 0;
+    }
+
+    .export-scope {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .export-scope-option {
+      min-width: 0;
+      font-size: 13px;
+    }
+
+    .export-btn {
+      width: 100%;
+    }
+
+    .toast {
+      max-width: calc(100% - 24px);
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .header-actions {
+      grid-template-columns: 40px repeat(2, minmax(0, 1fr));
+    }
+
+    .header-actions > :nth-child(n+4) {
+      grid-column: auto;
+    }
+
+    .controls {
+      grid-template-columns: 1fr;
+    }
+
+    .brush-options {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
 
 <div id="landingView">
   <section class="landing-hero">
-    <div class="landing-hero-logo">手書き글꼴</div>
-    <h1 class="landing-hero-title">157자를 쓰면,<br>260자 폰트가 완성됩니다.</h1>
-    <p class="landing-hero-copy">탁음도, 작은 っ도, 엔진이 알아서 짓습니다.</p>
-    <button type="button" class="action-btn landing-cta-btn" id="landingCtaBtn">폰트 만들기 시작</button>
+    <div class="landing-hero-logo">My Hirakana · マイヒラカナ</div>
+    <h1 class="landing-hero-title">한 글자씩 정성껏,<span class="landing-title-line">나만의 일본어 폰트</span></h1>
+    <p class="landing-hero-copy">히라가나와 가타카나를 원고지에 써 보세요. 탁음과 작은 글자는 자동으로 더해집니다.</p>
+    <button type="button" class="action-btn landing-cta-btn" id="landingCtaBtn">첫 글자 쓰러 가기</button>
     <a href="#" class="landing-restart-link" id="landingRestartLink" hidden>새로 시작</a>
   </section>
 
@@ -1113,7 +2199,7 @@
     <div class="landing-step">
       <div class="landing-step-num">1</div>
       <h3>원고지에 쓰기</h3>
-      <p>157자를 순서대로 손글씨로 채워 넣어요</p>
+      <p>원하는 문자 묶음을 골라 내 손글씨로 채워요</p>
     </div>
     <div class="landing-step">
       <div class="landing-step-num">2</div>
@@ -1135,7 +2221,7 @@
 <div id="studioView" hidden>
 
 <header>
-  <button type="button" class="header-logo header-logo-btn" id="headerLogoBtn">手書き글꼴</button>
+  <button type="button" class="header-logo header-logo-btn" id="headerLogoBtn">My Hirakana</button>
   <div class="header-progress">
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <span class="progress-text" id="progressText">기본 157자 중 0자</span>
@@ -3209,7 +4295,7 @@
       landingCtaBtn.textContent = `이어서 만들기 (${n}자 완료)`;
       landingRestartLink.hidden = false;
     } else {
-      landingCtaBtn.textContent = '폰트 만들기 시작';
+      landingCtaBtn.textContent = '첫 글자 쓰러 가기';
       landingRestartLink.hidden = true;
     }
   }
